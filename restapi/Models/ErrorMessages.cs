@@ -27,4 +27,11 @@ namespace restapi.Models
 
         public string Message { get => "This person cannot do approval job"; }
     }
+
+    public class InvalidPersonError
+    {
+        public int ErrorCode { get => 104; }
+
+        public string Message { get => "This person are not permitted to do this"; }
+    }
 }
