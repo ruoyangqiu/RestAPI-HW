@@ -72,6 +72,7 @@ namespace restapi.Controllers
         [HttpDelete("{id:guid}/deletion")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
+        [ProducesResponseType(typeof(InvalidPersonError), 409)]
         public IActionResult Delete(Guid id, [FromBody] Deletion deletion)
         {
             logger.LogInformation($"Looking for timesheet {id}");
@@ -86,7 +87,12 @@ namespace restapi.Controllers
             if (timecard.CanBeDeleted() == false)
             {
                 return StatusCode(409, new InvalidStateError() { });
-            }  
+            } 
+
+            if(!timecard.IsPermitted(deletion))
+                {
+                    return StatusCode(409, new InvalidPersonError(){ });
+                } 
 
             var transition = new Transition(deletion, TimecardStatus.Deleted);
 
@@ -153,9 +159,11 @@ namespace restapi.Controllers
             }
         }
 
-        // The post method to replace timecardline.
-        // It will replace an existing timecardline completely with input data. It will return the timecardline after updated
-        // The uniquee id of the original will also be replaced by the new one.
+        /* 
+        The post method to replace timecardline.
+        It will replace an existing timecardline completely with input data. It will return the timecardline after updated
+        The uniquee id of the original will also be replaced by the new one. 
+        */
         [HttpPost("{id:guid}/lines/{lineId:guid}")]
         [Produces(ContentTypes.TimesheetLine)]
         [ProducesResponseType(typeof(TimecardLine), 200)]
@@ -192,8 +200,8 @@ namespace restapi.Controllers
         }
 
 
-        // The patch method to update timecardline.
-        // It will update an existing timecardline with input data and return the timecardline after updated
+        /* The patch method to update timecardline.
+        It will update an existing timecardline with input data and return the timecardline after updated */
 
         [HttpPatch("{id:guid}/lines/{lineId:guid}")]
         [Produces(ContentTypes.TimesheetLine)]
@@ -256,6 +264,7 @@ namespace restapi.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(typeof(InvalidStateError), 409)]
         [ProducesResponseType(typeof(EmptyTimecardError), 409)]
+        [ProducesResponseType(typeof(InvalidPersonError), 409)]
         public IActionResult Submit(Guid id, [FromBody] Submittal submittal)
         {
             logger.LogInformation($"Looking for timesheet {id}");
@@ -272,6 +281,11 @@ namespace restapi.Controllers
                 if (timecard.Lines.Count < 1)
                 {
                     return StatusCode(409, new EmptyTimecardError() { });
+                }
+
+                if(!timecard.IsPermitted(submittal))
+                {
+                    return StatusCode(409, new InvalidPersonError(){ });
                 }
 
                 var transition = new Transition(submittal, TimecardStatus.Submitted);
@@ -329,6 +343,7 @@ namespace restapi.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(typeof(InvalidStateError), 409)]
         [ProducesResponseType(typeof(EmptyTimecardError), 409)]
+        [ProducesResponseType(typeof(InvalidPersonError), 409)]
 
         public IActionResult Cancel(Guid id, [FromBody] Cancellation cancellation)
         {
@@ -341,6 +356,11 @@ namespace restapi.Controllers
                 if (timecard.Status != TimecardStatus.Draft && timecard.Status != TimecardStatus.Submitted)
                 {
                     return StatusCode(409, new InvalidStateError() { });
+                }
+
+                if(!timecard.IsPermitted(cancellation))
+                {
+                    return StatusCode(409, new InvalidPersonError(){ });
                 }
 
 
@@ -399,6 +419,7 @@ namespace restapi.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(typeof(InvalidStateError), 409)]
         [ProducesResponseType(typeof(EmptyTimecardError), 409)]
+        [ProducesResponseType(typeof(InvalidPersonError), 409)]
         public IActionResult Reject(Guid id, [FromBody] Rejection rejection)
         {
             logger.LogInformation($"Looking for timesheet {id}");
@@ -410,6 +431,10 @@ namespace restapi.Controllers
                 if (timecard.Status != TimecardStatus.Submitted)
                 {
                     return StatusCode(409, new InvalidStateError() { });
+                }
+                if(!timecard.IsPermitted(rejection))
+                {
+                    return StatusCode(409, new InvalidPersonError(){ });
                 }
 
                 var transition = new Transition(rejection, TimecardStatus.Rejected);
