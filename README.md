@@ -1,4 +1,10 @@
 # RestAPI-HW
+Ruoyang Qiu
+
+4045856
+
+
+
 Remove (DELETE) a draft or cancelled timecard
   
   I add some functionality inside Delete method. And I also add links to switch statement inside GetActionLink() method in Timecard.cs.
