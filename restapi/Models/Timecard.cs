@@ -230,6 +230,23 @@ namespace restapi.Models
             }
             return lineIndex;
         }
+
+        public bool IsPermitted(Event ev)
+        {
+            if(Transitions.Count() == 0)
+            {
+                return true;
+            } else
+            {
+                if(Transitions[0].Event.Person == ev.Person)
+                {
+                    return true;
+                }else
+                {
+                    return false;
+                }
+            }
+        }
         public bool CanBeDeleted()
         {
             return (Status == TimecardStatus.Cancelled || Status == TimecardStatus.Draft);
