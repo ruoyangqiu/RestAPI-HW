@@ -24,13 +24,17 @@ Update (PATCH) a line item
   It will update an existing timecardline with input data and return the timecardline after updated 
 
 Verify that timecard person is consistent throughout the timecard's lifetime
-
-  I add a if/else statement inside post approval method. Hence if approver equals the employee of the submitted timecard, it will return
-  an error message.
+  
+  I set the employee's set function to private.
+  
+  I also add an if/else statement in every transition state method(Cancel/Reject/Delete/Submit) except approval, which cannot be the 
+  employee of timecard. The if/else statement will call a help method in Timecard.cs to make sure if the person of the event has the
+  Permission to do the change. If true, it will continue to make change. Else it will return a InvalidPersonError Message.
 
 Verify that timecard approver is not timecard person
 
-  I set the employee's set function to private.
+  I add a if/else statement inside post approval method. Hence if approver equals the employee of the submitted timecard, it will return
+  an error message.  
   
 Add support to root document for creating a timesheet
 
